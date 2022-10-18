@@ -42,6 +42,7 @@ export default {
 
 function method(path: string, ...methods: string[]) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+        //Code from itty-router
         const regex = RegExp(`^${('' + path)
             .replace(/(\/?)\*/g, '($1.*)?')                             // trailing wildcard
             .replace(/(\/$)|((?<=\/)\/)/, '')                           // remove trailing slash or double slash from joins
@@ -51,37 +52,94 @@ function method(path: string, ...methods: string[]) {
         }/*$`)
 
         if (targetPaths.includes(regex)) {
-            targets.find(value => value.pathReg === regex).method
+            const t = targets.find(value => value.pathReg === regex);
+            if (t == undefined) {
+                error("Target path cache doesn't match target list! Possible unauthorized modification of the API!")
+                return;
+            }
+
+            if (t.function !== descriptor.value) {
+                error("Illegal configuration! Multiple functions set to process the same path!")
+            }
+
+            for (const method of methods) {
+                if (t.methods.includes(method.toUpperCase())) {
+                    error(`Target path "${path.toString()}" already has method "${method.toString().toUpperCase()}" handled! Skipping!`)
+                    continue;
+                } else {
+                    t.methods.push(method);
+                }
+            }
         }
 
-        targets.push({pathReg: regex, method: "GET", "function": descriptor.value})
+        targets.push({pathReg: regex, methods: methods, function: descriptor.value})
     }
 }
 
-function get(path: string) {
+function GET(path: string) {
     return method(path, "GET");
 }
 
-function post(path: string) {
+function HEAD(path: string) {
+    return method(path, "HEAD");
+}
+
+function POST(path: string) {
     return method(path, "POST");
 }
 
-function put(path: string) {
+function PUT(path: string) {
     return method(path, "PUT");
 }
 
-function remove(path: string) {
-    return method(path, "REMOVE");
+function DELETE(path: string) {
+    return method(path, "DELETE");
 }
 
-function options(path: string) {
+function CONNECT(path: string) {
+    return method(path, "CONNECT");
+}
+
+function OPTIONS(path: string) {
     return method(path, "OPTIONS");
 }
 
+function TRACE(path: string) {
+    return method(path, "TRACE");
+}
+
+function PATCH(path: string) {
+    return method(path, "PATCH");
+}
+
+function ALL(path: string) {
+    return method(path, "ALL");
+}
+
+function info(...data: any[]) {
+    const newData: any[] = ["FTM API [INFO]: "];
+    newData.push(data);
+    console.log(newData);
+}
+
+function warn(...data: any[]) {
+    const newData: any[] = ["FTM API [WARN]: "];
+    newData.push(data);
+    console.warn(newData);
+}
+
+function error(...data: any[]) {
+    const newData: any[] = ["FTM API [ERROR]: "];
+    newData.push(data);
+    console.error(newData);
+}
+
 class DummyClass {
-    @get("/helloworld")
-    test(request: Request): Response {
+    @GET("/helloworld")
+    helloWorld(request: Request): Response {
         return new Response("Hello world!");
     }
+
+
 }
 
