@@ -200,7 +200,7 @@ class API {
         }
 
         const id = request.params.id;
-        if (!parseInt(id)) return undefined;
+        if (!parseInt(id)) return undefined; //TODO: change that
         const url = `https://api.twitch.tv/helix/chat/badges?broadcaster_id=${id}`;
         return fetch(url, headers);
     }
