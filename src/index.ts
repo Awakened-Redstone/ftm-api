@@ -61,7 +61,7 @@ export default {
 
 function CUSTOM(path: string, ...methods: string[]) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        info(`Adding handler for path "${path.toString()}" for methods ${JSON.stringify(methods)}`)
+        debug(`Adding handler for path "${path.toString()}" for methods ${JSON.stringify(methods)}`)
 
         //Code from itty-router
         const regex = RegExp(`^${('' + path)
@@ -165,7 +165,7 @@ class API {
         return new Response("Hello world!");
     }
 
-    @GET("/v2/twitch/users/:user")
+    @GET("/v2/twitch/user/:user")
     async users(request: RequestData): Promise<Response | undefined> {
         const headers = {
             headers: {
@@ -187,6 +187,21 @@ class API {
             else return undefined; //TODO: change that
         }
         const url = `https://api.twitch.tv/helix/users${search}`
+        return fetch(url, headers);
+    }
+
+    @GET("/v2/twitch/badges/:id")
+    badges(request: RequestData): Promise<Response> {
+        const headers = {
+            headers: {
+                'Authorization': `Bearer ${request.env.TWITCH_AUTH}`,
+                'Client-Id': `${request.env.TWITCH_CLIENT_ID}`
+            }
+        }
+
+        const id = request.params.id;
+        if (!parseInt(id)) return undefined;
+        const url = `https://api.twitch.tv/helix/chat/badges?broadcaster_id=${id}`;
         return fetch(url, headers);
     }
 }
