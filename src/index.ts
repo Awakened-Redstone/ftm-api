@@ -7,7 +7,8 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
-import {GET, register, RequestData, targets} from "./core";
+import {register, RequestData, targets, errorResponse} from "./core";
+import {Others} from "./others";
 import {Twitch} from "./twitch";
 import {API} from "./api";
 
@@ -26,7 +27,7 @@ export interface Env {
 
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-        register(Twitch, API);
+        register(Twitch, API, Others);
         let response, match, url = new URL(request.url), requestData: RequestData = {request: request, env: env, method: request.method, url: request.url};
         requestData.query = Object.fromEntries(url.searchParams)
         for (const {pathReg, methods, handlers} of targets) {
@@ -37,6 +38,9 @@ export default {
                 }
             }
         }
-        return new Response(`Invalid ${request.method.toUpperCase()} request!`, {status: 404});
+        return errorResponse("Endpoint not found", 404, {
+            message: `Invalid ${request.method.toUpperCase()} request!`,
+            reason: "API endpoint not found for this request type"
+        });
     }
 };

@@ -1,6 +1,6 @@
 {
-  "name": "ftm-api-ts",
-  "version": "0.0.0",
+  "name": "ftm-api",
+  "version": "0.1.0",
   "devDependencies": {
     "@cloudflare/workers-types": "^3.17.0",
     "typescript": "^4.8.4",

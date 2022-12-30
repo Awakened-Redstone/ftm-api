@@ -22,11 +22,40 @@ export interface RequestData {
 export const targets: Fetch[] = [];
 export const targetPaths: RegExp[] = [];
 
-export function register(...clazz: any[]) {}
+export function register(...clazz: any[]) {
+}
+
+export const defaultHeaders = {
+    headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+    }
+}
+
+export function stringify(json: any): string {
+    return JSON.stringify(json);
+}
+
+export function response(json: any): Response {
+    return new Response(stringify(json), defaultHeaders);
+}
+
+export function errorResponse(message: string, code: number, data: any): Response {
+    return new Response(errorStr(message, code, data),
+        {status: code, headers: defaultHeaders.headers});
+}
+
+export function errorJson(message: string, code: number, data: any): Object {
+    return {"error": {"message": message, "data": data, "code": code}}
+}
+
+export function errorStr(message: string, code: number, data: any): string {
+    return stringify(errorJson(message, code, data))
+}
 
 export function CUSTOM(path: string, ...methods: string[]) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        debug(`Adding handler for path "${path.toString()}" for methods ${JSON.stringify(methods)}`)
+        logDebug(`Adding handler for path "${path.toString()}" for methods ${JSON.stringify(methods)}`)
 
         //Code from itty-router
         const regex = RegExp(`^${('' + path)
@@ -40,7 +69,7 @@ export function CUSTOM(path: string, ...methods: string[]) {
         if (targetPaths.includes(regex)) {
             const t = targets.find(value => value.pathReg === regex);
             if (t == undefined) {
-                error("Target path cache doesn't match target list! Possible unauthorized modification of the API!")
+                logError("Target path cache doesn't match target list! Possible unauthorized modification of the API!")
                 return;
             }
 
@@ -50,7 +79,7 @@ export function CUSTOM(path: string, ...methods: string[]) {
 
             for (const method of methods) {
                 if (t.methods.includes(method.toUpperCase())) {
-                    error(`Target path "${path.toString()}" already has method "${method.toString().toUpperCase()}" handled! Skipping!`)
+                    logError(`Target path "${path.toString()}" already has method "${method.toString().toUpperCase()}" handled! Skipping!`)
                     continue;
                 } else {
                     t.methods.push(method);
@@ -103,18 +132,18 @@ export function ALL(path: string) {
     return CUSTOM(path, "ALL");
 }
 
-export function debug(data: any) {
+export function logDebug(data: any) {
     console.info("FTM API [DEBUG]: ", data);
 }
 
-export function info(data: any) {
+export function logInfo(data: any) {
     console.info("FTM API [INFO]: ", data);
 }
 
-export function warn(data: any) {
+export function logWarn(data: any) {
     console.warn("FTM API [WARN]: ", data);
 }
 
-export function error(data: any) {
+export function logError(data: any) {
     console.info("FTM API [ERROR]: ", data);
 }
