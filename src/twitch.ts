@@ -1,4 +1,4 @@
-import {GET, RequestData} from "./core";
+import {errorResponse, errorResponseSimple, GET, RequestData, response} from "./core";
 
 export class Twitch {
     @GET("/v2/twitch/user/:user")
@@ -18,11 +18,11 @@ export class Twitch {
         if (!request.query || !request.query.type) {
             if (parseInt(user)) search = `?id=${user}`;
             else if (user.match(userValidate)) search = `?login=${user}`;
-            else return new Response("Invalid user inserted!", {status: 400}); //TODO: json
+            else return errorResponseSimple("Invalid user inserted!", 400);
         } else {
             if (request.query.type === "login" || request.query.type === "user" && user.match(userValidate)) search = `?login=${user}`;
             else if (request.query.type === "id") search = `?id=${user}`;
-            else return new Response("Invalid search type!", {status: 400}); //TODO: json
+            else return errorResponseSimple("Invalid search type!", 400);
         }
         const url = `https://api.twitch.tv/helix/users${search}`
         return fetch(url, headers);
@@ -39,8 +39,25 @@ export class Twitch {
 
         // @ts-ignore
         const id = request.params.id;
-        if (!parseInt(id)) return new Response("Not a valid user ID!", {status: 400}); //TODO: json
+        if (!parseInt(id)) return errorResponseSimple("Not a valid user ID!", 400);
         const url = `https://api.twitch.tv/helix/chat/badges?broadcaster_id=${id}`;
+        return fetch(url, headers);
+    }
+
+    @GET("/v2/twitch/channel/:id")
+    async channels(request: RequestData): Promise<Response> {
+        const headers = {
+            headers: {
+                'Authorization': `Bearer ${request.env.TWITCH_AUTH}`,
+                'Client-Id': `${request.env.TWITCH_CLIENT_ID}`
+            }
+        }
+
+        // @ts-ignore
+        const id = request.params.id;
+        if (!parseInt(id)) return errorResponseSimple("Not a valid user ID!", 400);
+
+        const url = `https://api.twitch.tv/helix/channels?broadcaster_id=${id}`
         return fetch(url, headers);
     }
 }

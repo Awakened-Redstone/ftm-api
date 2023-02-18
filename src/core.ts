@@ -45,12 +45,25 @@ export function errorResponse(message: string, code: number, data: any): Respons
         {status: code, headers: defaultHeaders.headers});
 }
 
+export function errorResponseSimple(message: string, code: number): Response {
+    return new Response(errorStrSimple(message, code),
+        {status: code, headers: defaultHeaders.headers});
+}
+
 export function errorJson(message: string, code: number, data: any): Object {
     return {"error": {"message": message, "data": data, "code": code}}
 }
 
+export function errorJsonSimple(message: string, code: number): Object {
+    return {"error": {"message": message, "code": code}}
+}
+
 export function errorStr(message: string, code: number, data: any): string {
     return stringify(errorJson(message, code, data))
+}
+
+export function errorStrSimple(message: string, code: number): string {
+    return stringify(errorJsonSimple(message, code))
 }
 
 export function CUSTOM(path: string, ...methods: string[]) {
