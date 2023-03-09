@@ -23,6 +23,6 @@ export class API {
 
     @GET("/v2/modlist")
     modlist(request: RequestData): Response {
-        return response({plase_use_the_modrinth_api: "https://docs.modrinth.com/"})
+        return response({please_use_the_modrinth_api: "https://docs.modrinth.com/"})
     }
 }

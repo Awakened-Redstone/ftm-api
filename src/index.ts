@@ -15,6 +15,7 @@ import {API} from "./api";
 export interface Env {
     TWITCH_AUTH: string;
     TWITCH_CLIENT_ID: string;
+    API_DATA: KVNamespace;
     // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
     // MY_KV_NAMESPACE: KVNamespace;
     //

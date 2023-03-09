@@ -40,7 +40,7 @@ export function response(json: any): Response {
     return new Response(stringify(json), defaultHeaders);
 }
 
-export function errorResponse(message: string, code: number, data: any): Response {
+export function errorResponse(message: string, code: number, data: any = undefined): Response {
     return new Response(errorStr(message, code, data),
         {status: code, headers: defaultHeaders.headers});
 }
