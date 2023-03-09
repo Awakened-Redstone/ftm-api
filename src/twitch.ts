@@ -5,7 +5,6 @@ async function getToken(env: Env): Promise<string> {
     const cache = caches.default;
     const tokenCache = await cache.match("https://id.twitch.tv/oauth2/token");
     if (!!tokenCache) {
-        console.log("token cache")
         const json: {
             access_token?: string
             [others: string]: any
@@ -14,7 +13,6 @@ async function getToken(env: Env): Promise<string> {
             return json["access_token"]
         }
     } else {
-        console.log("token kv")
         const token = await env.API_DATA.get("twitch_token");
         if (token) return token;
     }
