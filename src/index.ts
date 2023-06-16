@@ -26,6 +26,7 @@ export interface Env {
     // MY_BUCKET: R2Bucket;
 }
 
+// noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
         register(Twitch, API, Others);
@@ -35,7 +36,15 @@ export default {
             if ((methods.includes(request.method.toUpperCase()) || methods.includes('ALL')) && (match = url.pathname.match(pathReg))) {
                 requestData.params = match.groups
                 for (const handler of handlers) {
-                    if ((response = await handler(requestData)) !== undefined) return response;
+                    if ((response = await handler(requestData)) !== undefined) {
+                        if (response.status !== 401 && response.status !== 403 && response.status < 500) {
+                            const responseCopy = response.clone()
+                            const cacheResponse = new Response(responseCopy.body, responseCopy);
+                            cacheResponse.headers.set("Cache-Control", "max-age=7200");
+                            await caches.default.put(request.url, cacheResponse);
+                        }
+                        return response;
+                    }
                 }
             }
         }

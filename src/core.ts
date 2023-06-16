@@ -22,6 +22,7 @@ export interface RequestData {
 export const targets: Fetch[] = [];
 export const targetPaths: RegExp[] = [];
 
+// noinspection JSUnusedLocalSymbols
 export function register(...clazz: any[]) {
 }
 
@@ -45,12 +46,25 @@ export function errorResponse(message: string, code: number, data: any = undefin
         {status: code, headers: defaultHeaders.headers});
 }
 
+export function errorResponseSimple(message: string, code: number): Response {
+    return new Response(errorStrSimple(message, code),
+        {status: code, headers: defaultHeaders.headers});
+}
+
 export function errorJson(message: string, code: number, data: any): Object {
     return {"error": {"message": message, "data": data, "code": code}}
 }
 
+export function errorJsonSimple(message: string, code: number): Object {
+    return {"error": {"message": message, "code": code}}
+}
+
 export function errorStr(message: string, code: number, data: any): string {
     return stringify(errorJson(message, code, data))
+}
+
+export function errorStrSimple(message: string, code: number): string {
+    return stringify(errorJsonSimple(message, code))
 }
 
 export function CUSTOM(path: string, ...methods: string[]) {
@@ -80,7 +94,6 @@ export function CUSTOM(path: string, ...methods: string[]) {
             for (const method of methods) {
                 if (t.methods.includes(method.toUpperCase())) {
                     logError(`Target path "${path.toString()}" already has method "${method.toString().toUpperCase()}" handled! Skipping!`)
-                    continue;
                 } else {
                     t.methods.push(method);
                 }
@@ -88,7 +101,12 @@ export function CUSTOM(path: string, ...methods: string[]) {
         }
 
         targetPaths.push(regex);
-        targets.push({pathReg: regex, methods: methods, handlers: [descriptor.value]})
+        targets.push({
+            pathReg: regex, methods: methods, handlers: [async request => {
+                const cache = await caches.default.match(request.url);
+                return cache || descriptor.value(request);
+            }]
+        })
     }
 }
 
@@ -133,17 +151,17 @@ export function ALL(path: string) {
 }
 
 export function logDebug(data: any) {
-    console.info("FTM API [DEBUG]: ", data);
+    console.debug("AWAKENED API [DEBUG]: ", data);
 }
 
 export function logInfo(data: any) {
-    console.info("FTM API [INFO]: ", data);
+    console.info("AWAKENED API [INFO]: ", data);
 }
 
 export function logWarn(data: any) {
-    console.warn("FTM API [WARN]: ", data);
+    console.warn("AWAKENED API [WARN]: ", data);
 }
 
 export function logError(data: any) {
-    console.info("FTM API [ERROR]: ", data);
+    console.error("AWAKENED API [ERROR]: ", data);
 }

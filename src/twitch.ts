@@ -1,4 +1,4 @@
-import {errorResponse, GET, RequestData} from "./core";
+import {errorResponseSimple, GET, RequestData} from "./core";
 import {Env} from "./index";
 
 async function getToken(env: Env): Promise<string> {
@@ -77,7 +77,7 @@ async function safeGet(url: string, request: RequestData) {
 
 export class Twitch {
     @GET("/v2/twitch/user/:user")
-    async users(request: RequestData): Promise<Response> {
+    async user(request: RequestData): Promise<Response> {
         // @ts-ignore
         const user = request.params.user;
         const userValidate = RegExp("^[a-zA-Z\\d]\\w{0,24}$");
@@ -85,12 +85,12 @@ export class Twitch {
 
         if (!request.query || !request.query.type) {
             if (parseInt(user)) search = `?id=${user}`;
-            else if (user.match(userValidate)) search = `?login=${user}`;
-            else return errorResponse("Invalid user inserted!", 400);
+            else if (userValidate.test(user)) search = `?login=${user}`;
+            else return errorResponseSimple("Invalid user inserted!", 400);
         } else {
-            if (request.query.type === "login" || request.query.type === "user" && user.match(userValidate)) search = `?login=${user}`;
-            else if (request.query.type === "id") search = `?id=${user}`;
-            else return errorResponse("Invalid search type!", 400);
+            if (request.query.type === "login" || request.query.type === "user" && userValidate.test(user)) search = `?login=${user}`;
+            else if (request.query.type === "id" && parseInt(user)) search = `?id=${user}`;
+            else return errorResponseSimple("Invalid search type!", 400);
         }
         const url = `https://api.twitch.tv/helix/users${search}`
         return safeGet(url, request);
@@ -100,8 +100,25 @@ export class Twitch {
     async badges(request: RequestData): Promise<Response> {
         // @ts-ignore
         const id = request.params.id;
-        if (!parseInt(id)) return errorResponse("Not a valid user ID!", 400);
+        if (!parseInt(id)) return errorResponseSimple("Not a valid user ID!", 400);
         const url = `https://api.twitch.tv/helix/chat/badges?broadcaster_id=${id}`;
         return safeGet(url, request);
+    }
+
+    @GET("/v2/twitch/channel/:id")
+    async channel(request: RequestData): Promise<Response> {
+        const headers = {
+            headers: {
+                'Authorization': `Bearer ${request.env.TWITCH_AUTH}`,
+                'Client-Id': `${request.env.TWITCH_CLIENT_ID}`
+            }
+        }
+
+        // @ts-ignore
+        const id = request.params.id;
+        if (!parseInt(id)) return errorResponseSimple("Not a valid user ID!", 400);
+
+        const url = `https://api.twitch.tv/helix/channels?broadcaster_id=${id}`
+        return fetch(url, headers);
     }
 }

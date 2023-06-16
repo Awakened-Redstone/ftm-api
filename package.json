@@ -1,14 +1,14 @@
 {
-  "name": "ftm-api",
-  "version": "0.1.0",
+  "name": "awakened-api",
+  "version": "2.1.0",
   "devDependencies": {
-    "@cloudflare/workers-types": "^3.17.0",
-    "typescript": "^4.8.4",
-    "wrangler": "2.1.12"
+    "@cloudflare/workers-types": "^4.20230518.0",
+    "typescript": "^5.1.3",
+    "wrangler": "^3.1.0"
   },
   "private": true,
   "scripts": {
-    "start": "wrangler dev",
-    "deploy": "wrangler publish"
+    "start": "wrangler dev --remote",
+    "deploy": "wrangler deploy"
   }
 }
