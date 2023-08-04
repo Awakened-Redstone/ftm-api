@@ -77,6 +77,7 @@ async function safeGet(url: string, request: RequestData) {
 
 export class Twitch {
     @GET("/v2/twitch/user/:user")
+    @GET("/v2/twitch/users/:user")
     async user(request: RequestData): Promise<Response> {
         // @ts-ignore
         const user = request.params.user;
@@ -106,19 +107,27 @@ export class Twitch {
     }
 
     @GET("/v2/twitch/channel/:id")
+    @GET("/v2/twitch/channels/:id")
     async channel(request: RequestData): Promise<Response> {
-        const headers = {
-            headers: {
-                'Authorization': `Bearer ${request.env.TWITCH_AUTH}`,
-                'Client-Id': `${request.env.TWITCH_CLIENT_ID}`
-            }
-        }
-
         // @ts-ignore
         const id = request.params.id;
         if (!parseInt(id)) return errorResponseSimple("Not a valid user ID!", 400);
 
         const url = `https://api.twitch.tv/helix/channels?broadcaster_id=${id}`
-        return fetch(url, headers);
+        return safeGet(url, request);
+    }
+
+    @GET("/v2/twitch/categories/:search")
+    async categories(request: RequestData): Promise<Response> {
+        // @ts-ignore
+        const search = request.params.search;
+        const url = `https://api.twitch.tv/helix/search/categories?query=${search}`;
+        return safeGet(url, request);
+    }
+
+    @GET("/v2/twitch/content_classification_labels")
+    async content_classification_labels(request: RequestData): Promise<Response> {
+        const url = "https://api.twitch.tv/helix/content_classification_labels";
+        return safeGet(url, request);
     }
 }
