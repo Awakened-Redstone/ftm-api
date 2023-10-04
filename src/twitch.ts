@@ -19,7 +19,7 @@ async function getToken(env: Env): Promise<string> {
     return "";
 }
 
-async function validate(env: Env) {
+async function validateEnv(env: Env) {
     const headers = {
         headers: {
             'Authorization': `Bearer ${await getToken(env)}`,
@@ -51,7 +51,7 @@ async function validate(env: Env) {
     }
 }
 
-async function safeGet(url: string, request: RequestData) {
+async function assertValidCredentialsAndFetchData(url: string, request: RequestData) {
     let headers = {
         headers: {
             'Authorization': `Bearer ${await getToken(request.env)}`,
@@ -61,7 +61,7 @@ async function safeGet(url: string, request: RequestData) {
 
     let response = await fetch(url, headers);
     if (response.status === 401) {
-        await validate(request.env);
+        await validateEnv(request.env);
 
         headers = {
             headers: {
