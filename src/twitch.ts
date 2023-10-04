@@ -1,5 +1,6 @@
 import {errorResponseSimple, GET, RequestData} from "./core";
 import {Env} from "./index";
+import {GetUsersResponsePredicate, JustPassPredicate, Predicate} from "./Predicates";
 
 async function getToken(env: Env): Promise<string> {
     const cache = caches.default;
@@ -75,6 +76,22 @@ async function assertValidCredentialsAndFetchData(url: string, request: RequestD
     return response;
 }
 
+async function processResponse(url: string, request: RequestData, predicate: Predicate) {
+    const _response = await assertValidCredentialsAndFetchData(url, request);
+    const response = _response.clone();
+
+    if (response.status === 200) {
+        const json: any = await response.json();
+        const processedResponse = predicate(json);
+        if (processedResponse) return processedResponse;
+        else return _response;
+    } else if (response.status === 401) {
+        return errorResponseSimple("Failed to assert credentials", 500);
+    } else {
+        return errorResponseSimple("Unknown error", 500);
+    }
+}
+
 export class Twitch {
     @GET("/v2/twitch/user/:user")
     async user(request: RequestData): Promise<Response> {
@@ -93,7 +110,7 @@ export class Twitch {
             else return errorResponseSimple("Invalid search type!", 400);
         }
         const url = `https://api.twitch.tv/helix/users${search}`
-        return safeGet(url, request);
+        return processResponse(url, request, GetUsersResponsePredicate);
     }
 
     @GET("/v2/twitch/badges/:id")
@@ -102,7 +119,7 @@ export class Twitch {
         const id = request.params.id;
         if (!parseInt(id)) return errorResponseSimple("Not a valid user ID!", 400);
         const url = `https://api.twitch.tv/helix/chat/badges?broadcaster_id=${id}`;
-        return safeGet(url, request);
+        return processResponse(url, request, JustPassPredicate);
     }
 
     @GET("/v2/twitch/channel/:id")
@@ -112,7 +129,7 @@ export class Twitch {
         if (!parseInt(id)) return errorResponseSimple("Not a valid user ID!", 400);
 
         const url = `https://api.twitch.tv/helix/channels?broadcaster_id=${id}`
-        return safeGet(url, request);
+        return processResponse(url, request, GetUsersResponsePredicate);
     }
 
     @GET("/v2/twitch/categories/:search")
@@ -120,12 +137,12 @@ export class Twitch {
         // @ts-ignore
         const search = request.params.search;
         const url = `https://api.twitch.tv/helix/search/categories?query=${search}`;
-        return safeGet(url, request);
+        return processResponse(url, request, JustPassPredicate);
     }
 
     @GET("/v2/twitch/content_classification_labels")
     async content_classification_labels(request: RequestData): Promise<Response> {
         const url = "https://api.twitch.tv/helix/content_classification_labels";
-        return safeGet(url, request);
+        return processResponse(url, request, JustPassPredicate);
     }
 }
