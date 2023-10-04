@@ -26,8 +26,8 @@ export class API {
         return response({data: "https://github.com/Awakened-Redstone"});
     }
 
-    @GET("/v2/modlist")
-    modlist(request: RequestData): Response {
-        return response({please_use_the_modrinth_api: "https://docs.modrinth.com/"})
+    @GET("/v2/mods")
+    mods(request: RequestData): Response {
+        return response({data: ["please_use_the_modrinth_api", "https://docs.modrinth.com/"]})
     }
 }
