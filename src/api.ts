@@ -15,19 +15,4 @@ export class API {
     helloWorld(request: RequestData): Response {
         return response({data: "Hello world!"});
     }
-
-    @GET("/v2/modrinth")
-    modrinth(request: RequestData): Response {
-        return response({data: "https://modrinth.com/user/Awakened-Redstone"});
-    }
-
-    @GET("/v2/github")
-    github(request: RequestData): Response {
-        return response({data: "https://github.com/Awakened-Redstone"});
-    }
-
-    @GET("/v2/mods")
-    mods(request: RequestData): Response {
-        return response({data: ["please_use_the_modrinth_api", "https://docs.modrinth.com/"]})
-    }
 }
