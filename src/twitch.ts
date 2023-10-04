@@ -77,7 +77,6 @@ async function assertValidCredentialsAndFetchData(url: string, request: RequestD
 
 export class Twitch {
     @GET("/v2/twitch/user/:user")
-    @GET("/v2/twitch/users/:user")
     async user(request: RequestData): Promise<Response> {
         // @ts-ignore
         const user = request.params.user;
@@ -107,7 +106,6 @@ export class Twitch {
     }
 
     @GET("/v2/twitch/channel/:id")
-    @GET("/v2/twitch/channels/:id")
     async channel(request: RequestData): Promise<Response> {
         // @ts-ignore
         const id = request.params.id;
