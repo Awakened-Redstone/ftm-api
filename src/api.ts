@@ -1,4 +1,4 @@
-import {GET, RequestData, response, errorResponse, POST} from "./core";
+import {defaultHeaders, errorResponse, GET, POST, RequestData, response} from "./core";
 
 export class API {
     @GET("/v1/*?")
@@ -14,5 +14,15 @@ export class API {
     @GET("/v2/helloworld")
     helloWorld(request: RequestData): Response {
         return response({data: "Hello world!"});
+    }
+
+    @GET("/v2/subathon")
+    subathon(request: RequestData): Response {
+        return new Response(null, {
+            status: 308, headers: {
+                ...defaultHeaders.headers,
+                "Location": "http://localhost:3000" + new URL(request.url).search
+            }
+        });
     }
 }
